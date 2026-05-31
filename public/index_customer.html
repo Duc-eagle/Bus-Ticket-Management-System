@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Bus - Đặt vé xe khách trực tuyến</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+        }
+
+        /* ============ TOP BAR ============ */
+        .top-bar {
+            background: #1a2849;
+            color: white;
+            padding: 12px 0;
+            font-size: 14px;
+        }
+
+        .top-bar-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .top-bar-left {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .top-bar-left a {
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .top-bar-left a:hover {
+            color: #0099ff;
+        }
+
+        .top-bar-right a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            transition: all 0.3s;
+        }
+
+        .top-bar-right a:hover {
+            color: #0099ff;
+        }
+
+        /* ============ NAVBAR ============ */
+        .navbar-custom {
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 15px 0;
+        }
+
+        .navbar-custom .navbar-brand {
+            font-size: 24px;
+            font-weight: bold;
+            color: #0099ff !important;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .navbar-custom .navbar-brand i {
+            font-size: 30px;
+        }
+
+        .navbar-custom .nav-link {
+            color: #333 !important;
+            font-weight: 500;
+            transition: all 0.3s;
+            margin: 0 15px;
+        }
+
+        .navbar-custom .nav-link:hover {
+            color: #0099ff !important;
+        }
+
+        /* ============ HERO SECTION ============ */
+        .hero-section {
+            background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
+                        url('https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1200&h=600&fit=crop') center/cover;
+            height: 550px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content h1 {
+            font-size: 64px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            animation: slideInDown 0.8s ease-out;
+        }
+
+        .hero-content h1 .highlight {
+            color: #0099ff;
+        }
+
+        .hero-content p {
+            font-size: 20px;
+            margin-bottom: 30px;
+            color: #e0e0e0;
+            animation: slideInUp 0.8s ease-out;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 40px;
+            animation: slideInUp 0.8s ease-out 0.2s both;
+        }
+
+        .btn-explore {
+            background: #0099ff;
+            color: white;
+            padding: 12px 35px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-explore:hover {
+            background: #0077cc;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 153, 255, 0.4);
+        }
+
+        .btn-video {
+            background: transparent;
+            border: 2px solid white;
+            color: white;
+            padding: 12px 35px;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-video:hover {
+            background: white;
+            color: #0099ff;
+        }
+
+        /* ============ SEARCH FORM ============ */
+        .search-form-container {
+            position: absolute;
+            bottom: -90px;
+            left: 0;
+            right: 0;
+            width: 100%;
+        }
+
+        .search-form {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 1200px;
+            margin: 0 auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr auto;
+            gap: 20px;
+            align-items: flex-end;
+        }
+
+        .search-form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .search-form-group label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .search-form-group select,
+        .search-form-group input {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .search-form-group select:focus,
+        .search-form-group input:focus {
+            border-color: #0099ff;
+            box-shadow: 0 0 0 3px rgba(0, 153, 255, 0.1);
+            outline: none;
+        }
+
+        .btn-search {
+            background: #c41e3a;
+            color: white;
+            padding: 10px 30px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .btn-search:hover {
+            background: #a01830;
+            transform: translateY(-2px);
+        }
+
+        /* ============ FEATURES SECTION ============ */
+        .features-section {
+            background: white;
+            padding: 80px 20px 40px;
+            margin-top: 100px;
+        }
+
+        .features-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: #0099ff;
+            margin-bottom: 15px;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 50px;
+            font-size: 16px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .feature-card {
+            text-align: center;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .feature-icon {
+            font-size: 60px;
+            color: #0099ff;
+            margin-bottom: 20px;
+            background: #f0f7ff;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .feature-card h3 {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .feature-card p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* ============ POPULAR ROUTES SECTION ============ */
+        .routes-section {
+            background: #f8f9fa;
+            padding: 60px 20px;
+        }
+
+        .routes-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .routes-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+        }
+
+        .route-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .route-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .route-image {
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .route-info {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .route-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #c41e3a;
+            margin-bottom: 10px;
+        }
+
+        .route-details {
+            display: flex;
+            gap: 30px;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .route-detail {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .route-price {
+            font-size: 18px;
+            font-weight: bold;
+            color: #0099ff;
+        }
+
+        /* ============ DESTINATIONS SECTION ============ */
+        .destinations-section {
+            background: white;
+            padding: 60px 20px;
+        }
+
+        .destinations-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .destinations-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 60px;
+        }
+
+        .destination-card {
+            position: relative;
+            height: 200px;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .destination-card:hover {
+            transform: scale(1.05);
+        }
+
+        .destination-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .destination-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0);
+            transition: all 0.3s;
+            display: flex;
+            align-items: flex-end;
+            padding: 15px;
+            color: white;
+        }
+
+        .destination-card:hover .destination-overlay {
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .destination-name {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        /* ============ FOOTER ============ */
+        .footer {
+            background: #1a2849;
+            color: white;
+            padding: 60px 20px 30px;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            margin-bottom: 40px;
+            padding-bottom: 40px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-section h3 {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #0099ff;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-section a {
+            color: #ccc;
+            text-decoration: none;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .footer-section a:hover {
+            color: #0099ff;
+        }
+
+        .contact-info {
+            font-size: 14px;
+            color: #ccc;
+            line-height: 1.8;
+        }
+
+        .contact-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #c41e3a;
+            margin: 10px 0;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .social-icons a {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            color: #0099ff;
+        }
+
+        .social-icons a:hover {
+            background: #0099ff;
+            color: white;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 20px;
+            color: #999;
+            font-size: 14px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* ============ ANIMATIONS ============ */
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ============ RESPONSIVE ============ */
+        @media (max-width: 1024px) {
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .routes-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .destinations-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .search-form {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .footer-content {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .top-bar-content {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .hero-content h1 {
+                font-size: 40px;
+            }
+
+            .hero-content p {
+                font-size: 16px;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .search-form {
+                grid-template-columns: 1fr;
+                padding: 20px;
+                bottom: -50px;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .destinations-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .route-card {
+                grid-template-columns: 1fr;
+            }
+
+            .route-image {
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- TOP BAR -->
+    <div class="top-bar">
+        <div class="top-bar-content">
+            <div class="top-bar-left">
+                <a href="mailto:mybus@gmail.com"><i class="fas fa-envelope"></i> mybus@gmail.com</a>
+                <a href="tel:0900-080-0760"><i class="fas fa-phone"></i> 090-080-0760</a>
+                <a href="#"><i class="fab fa-facebook"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+            </div>
+            <div class="top-bar-right">
+                <a href="#">Đăng Nhập</a>
+                <a href="#">Đăng Ký</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container-lg">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-map-pin"></i> My Bus
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Trang Chủ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Lịch Trình</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Liên Hệ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Hóa Đơn</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <section class="hero-section">
+        <div style="position: relative; z-index: 10; width: 100%; text-align: center;">
+            <div class="hero-content">
+                <h1>Welcome to <span class="highlight">My Bus</span></h1>
+                <p>Dì để khám phá bản thân, dì để tìm thấy câu trả lời hạnh phúc thật sự</p>
+                <div class="hero-buttons">
+                    <button class="btn-explore">KHÁM PHÁ</button>
+                    <button class="btn-video">
+                        <i class="fas fa-play"></i> Watch Video
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEARCH FORM -->
+        <div class="search-form-container" style="position: absolute; left: 0; right: 0; bottom: -100px; width: 100%; z-index: 20;">
+            <div class="container-lg">
+                <form class="search-form">
+                    <div class="search-form-group">
+                        <label>Điểm đi</label>
+                        <select>
+                            <option>Chọn điểm khởi hành</option>
+                            <option>Cần Thơ</option>
+                            <option>Sài Gòn</option>
+                            <option>An Giang</option>
+                        </select>
+                    </div>
+                    <div class="search-form-group">
+                        <label>Điểm đến</label>
+                        <select>
+                            <option>Chọn điểm đến</option>
+                            <option>Cần Thơ</option>
+                            <option>Sài Gòn</option>
+                            <option>An Giang</option>
+                        </select>
+                    </div>
+                    <div class="search-form-group">
+                        <label>Ngày đi</label>
+                        <input type="date">
+                    </div>
+                    <div class="search-form-group">
+                        <label>Ngày về</label>
+                        <input type="date">
+                    </div>
+                    <button type="submit" class="btn-search">TÌM CHUYẾN XE</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURES SECTION -->
+    <section class="features-section">
+        <div class="features-container">
+            <h2 class="section-title">MY BUS - CHẤT LƯỢNG LÀ DANH DỰ</h2>
+            <p class="section-subtitle">Được khách hàng tin tưởng và lựa chọn</p>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-thumbs-up"></i>
+                    </div>
+                    <h3>Tiền Lợi</h3>
+                    <p>Mua vé xe với lợi, mọi nơi mà không cần tốn nhiều thời gian đặn trả lời hành phúc thật sự</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <h3>Hỗ Trợ 24/7</h3>
+                    <p>Chúng tôi cung cấp dịch vụ chăm sóc khách hàng 24 giờ. Bất cứ lúc nào bạn gặp vấn đề hãy liên hệ với chúng tôi</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-list"></i>
+                    </div>
+                    <h3>Thông tin đầy đủ</h3>
+                    <p>Từ lịch trình, tuyến đường, chuyến xe, giá vé, chỗ ngồi và những thông tin đầy đủ, chi tiết</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <h3>Thanh toán dễ dàng</h3>
+                    <p>Cho dù bạn muốn thanh toán bằng chuyển khoản hay thẻ tín dụng, chúng tôi đều hỗ trợ đầy đủ</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- POPULAR ROUTES SECTION -->
+    <section class="routes-section">
+        <div class="routes-container">
+            <h2 class="section-title">TUYẾN PHỐ BIẾN</h2>
+            <p class="section-subtitle">Gợi ý những tuyến xe được đặt nhiều</p>
+
+            <div class="routes-grid">
+                <div class="route-card">
+                    <img src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=200&h=150&fit=crop" alt="Cần Thơ - Sài Gòn" class="route-image">
+                    <div class="route-info">
+                        <h4 class="route-name">Cần Thơ ⇒ Sài Gòn</h4>
+                        <div class="route-details">
+                            <span class="route-detail"><i class="fas fa-clock"></i> 4h</span>
+                            <span class="route-detail"><i class="fas fa-map-marker-alt"></i> 168km</span>
+                        </div>
+                        <div class="route-price">150.000 đ</div>
+                    </div>
+                </div>
+
+                <div class="route-card">
+                    <img src="https://images.unsplash.com/photo-1486299267070-83823f5448dd?w=200&h=150&fit=crop" alt="Sài Gòn - Cần Thơ" class="route-image">
+                    <div class="route-info">
+                        <h4 class="route-name">Sài Gòn ⇒ Cần Thơ</h4>
+                        <div class="route-details">
+                            <span class="route-detail"><i class="fas fa-clock"></i> 4h</span>
+                            <span class="route-detail"><i class="fas fa-map-marker-alt"></i> 168km</span>
+                        </div>
+                        <div class="route-price">150.000 đ</div>
+                    </div>
+                </div>
+
+                <div class="route-card">
+                    <img src="https://images.unsplash.com/photo-1518156677180-95a2893f3e9f?w=200&h=150&fit=crop" alt="Cần Thơ - An Giang" class="route-image">
+                    <div class="route-info">
+                        <h4 class="route-name">Cần Thơ ⇒ An Giang</h4>
+                        <div class="route-details">
+                            <span class="route-detail"><i class="fas fa-clock"></i> 3h</span>
+                            <span class="route-detail"><i class="fas fa-map-marker-alt"></i> 62km</span>
+                        </div>
+                        <div class="route-price">100.000 đ</div>
+                    </div>
+                </div>
+
+                <div class="route-card">
+                    <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=200&h=150&fit=crop" alt="Cần Thơ - Cà Mau" class="route-image">
+                    <div class="route-info">
+                        <h4 class="route-name">Cần Thơ ⇒ Cà Mau</h4>
+                        <div class="route-details">
+                            <span class="route-detail"><i class="fas fa-clock"></i> 3h30</span>
+                            <span class="route-detail"><i class="fas fa-map-marker-alt"></i> 149km</span>
+                        </div>
+                        <div class="route-price">140.000 đ</div>
+                    </div>
+                </div>
+
+                <div class="route-card">
+                    <img src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=200&h=150&fit=crop" alt="Sài Gòn - Sóc Trăng" class="route-image">
+                    <div class="route-info">
+                        <h4 class="route-name">Sài Gòn ⇒ Sóc Trăng</h4>
+                        <div class="route-details">
+                            <span class="route-detail"><i class="fas fa-clock"></i> 4h15</span>
+                            <span class="route-detail"><i class="fas fa-map-marker-alt"></i> 230km</span>
+                        </div>
+                        <div class="route-price">280.000 đ</div>
+                    </div>
+                </div>
+
+                <div class="route-card">
+                    <img src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=200&h=150&fit=crop" alt="Cần Thơ - Kiên Giang" class="route-image">
+                    <div class="route-info">
+                        <h4 class="route-name">Cần Thơ ⇒ Kiên Giang</h4>
+                        <div class="route-details">
+                            <span class="route-detail"><i class="fas fa-clock"></i> 3h</span>
+                            <span class="route-detail"><i class="fas fa-map-marker-alt"></i> 106km</span>
+                        </div>
+                        <div class="route-price">130.000 đ</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- DESTINATIONS SECTION -->
+    <section class="destinations-section">
+        <div class="destinations-container">
+            <h2 class="section-title">ĐIỂM ĐẾN PHỔ BIẾN</h2>
+            <p class="section-subtitle">Gợi ý những điểm du lịch được ưa thích trong năm</p>
+
+            <div class="destinations-grid">
+                <div class="destination-card">
+                    <img src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=400&h=300&fit=crop" alt="Sài Gòn">
+                    <div class="destination-overlay">
+                        <span class="destination-name">Sài Gòn</span>
+                    </div>
+                </div>
+
+                <div class="destination-card">
+                    <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop" alt="Cà Mau">
+                    <div class="destination-overlay">
+                        <span class="destination-name">Cà Mau</span>
+                    </div>
+                </div>
+
+                <div class="destination-card">
+                    <img src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=300&fit=crop" alt="Sóc Trăng">
+                    <div class="destination-overlay">
+                        <span class="destination-name">Sóc Trăng</span>
+                    </div>
+                </div>
+
+                <div class="destination-card">
+                    <img src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=400&h=300&fit=crop" alt="Kiên Giang">
+                    <div class="destination-overlay">
+                        <span class="destination-name">Kiên Giang</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Kết nối với chúng tôi</h3>
+                <div class="contact-number">1900 2082</div>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                </div>
+                <div class="contact-info" style="margin-top: 20px;">
+                    Địa chỉ: Q.Ninh Kiều, TP.Cần Thơ<br>
+                    Email: info@mybus.com
+                </div>
+            </div>
+
+            <div class="footer-section">
+                <h3>Hướng dẫn</h3>
+                <ul>
+                    <li><a href="#">Hướng dẫn đặt vé trên Web</a></li>
+                    <li><a href="#">Hướng dẫn đặt vé trên App</a></li>
+                    <li><a href="#">Hỏi đáp</a></li>
+                    <li><a href="#">Điều khoản sử dụng</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h3>Đi đến trang</h3>
+                <ul>
+                    <li><a href="#">Trang Chủ</a></li>
+                    <li><a href="#">Lịch Trình</a></li>
+                    <li><a href="#">Liên Hệ</a></li>
+                    <li><a href="#">Đăng Nhập</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h3>Khác</h3>
+                <ul>
+                    <li><a href="#">Trợ Thành nhà cung cấp</a></li>
+                    <li><a href="#">Công tác với chúng tôi</a></li>
+                    <li><a href="#">Chính sách bảo mật</a></li>
+                    <li><a href="#">Liên Kết Hữu Dụng</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            © 2026 My Bus Management System. All rights reserved. | Tất cả các quyền được bảo lưu.
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Smooth scroll for buttons
+        document.querySelectorAll('[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
