@@ -53,6 +53,9 @@
                 @endforeach
                 </tbody>
             </table>
+            <div class="mt-4 d-flex justify-content-center">
+                {{ $buses->links('pagination::bootstrap-5') }}
+            </div>
         </div>
     </div>
 @endsection

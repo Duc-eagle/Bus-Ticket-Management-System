@@ -194,15 +194,15 @@
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label">Họ và tên</label>
-                        <input type="text" class="form-control" value="{{ Auth::user()->full_name }}" readonly>
+                        <input type="text" class="form-control" name="customer_name" value="{{ Auth::user()->full_name }}">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Số điện thoại</label>
-                        <input type="text" class="form-control" value="{{ Auth::user()->phone }}" readonly>
+                        <input type="text" class="form-control" name="customer_phone" value="{{ Auth::user()->phone }}">
                     </div>
                     <div class="col-md-12">
                         <label class="form-label">Email</label>
-                        <input type="email" class="form-control" value="{{ Auth::user()->email }}" readonly>
+                        <input type="email" class="form-control" name="customer_email" value="{{ Auth::user()->email }}">
                     </div>
                 </div>
                 <p class="text-muted mt-3 mb-0" style="font-size: 13px;">

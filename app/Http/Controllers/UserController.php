@@ -51,8 +51,12 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-        User::create($request->all());
-        return Redirect::route('users.index');
+        $data = $request->all();
+        if (!empty($data['password'])) {
+            $data['password'] = Hash::make($data['password']);
+        }
+        User::create($data);
+        return Redirect::route('users.index')->with('success', 'Thêm người dùng thành công');
     }
 
     public function edit(User $user)
@@ -62,10 +66,16 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
+        $data = $request->all();
+        
+        if (!empty($data['password'])) {
+            $data['password'] = Hash::make($data['password']);
+        } else {
+            unset($data['password']);
+        }
 
-
-        $user->update($request->all());
-        return Redirect::route('users.index');
+        $user->update($data);
+        return Redirect::route('users.index')->with('success', 'Cập nhật thông tin thành công');
     }
 
     public function destroy(User $user)
@@ -79,21 +89,30 @@ class UserController extends Controller
 
     public function checkPhone(Request $request)
     {
+        // 1. LẤY SỐ ĐIỆN THOẠI TỪ REQUEST QUERY
         $phone = $request->query('phone');
-        if (!$phone) {
-            return response()->json(['exists' => false]);
+        
+        // 2. KHỞI TẠO MẢNG JSON TRẢ VỀ MẶC ĐỊNH
+        $responseData = [];
+        $responseData['exists'] = false;
+        $responseData['name'] = '';
+
+        // 3. KIỂM TRA ĐẦU VÀO CƠ BẢN
+        if (empty($phone)) {
+            return response()->json($responseData);
         }
 
+        // 4. TÌM KHÁCH HÀNG THEO SỐ ĐIỆN THOẠI
         $user = User::where('phone', $phone)->first();
 
-        if ($user) {
-            return response()->json([
-                'exists' => true,
-                'name' => $user->full_name
-            ]);
+        // 5. NẾU TÌM THẤY, CẬP NHẬT LẠI MẢNG KẾT QUẢ
+        if ($user != null) {
+            $responseData['exists'] = true;
+            $responseData['name'] = $user->full_name;
         }
 
-        return response()->json(['exists' => false]);
+        // 6. TRẢ VỀ ĐỊNH DẠNG JSON CHO FRONTEND AJAX
+        return response()->json($responseData);
     }
 
     public function adminsLogin() {
@@ -101,7 +120,7 @@ class UserController extends Controller
     }
 
     public function adminsLoginProcess(Request $request) {
-        if(Auth::guard('admin')->attempt($request->only('email', 'password'))) {
+        if(Auth::guard('admin')->attempt($request->only('email', 'password'), $request->has('remember'))) {
             $user = Auth::guard('admin')->user();
             if ($user->role == 'admin' || $user->role == 'staff' || $user->role == 'author') {
                 $request->session()->regenerate();
@@ -131,7 +150,7 @@ class UserController extends Controller
             'password' => 'required',
         ]);
 
-        if(Auth::guard('web')->attempt($request->only('email', 'password'))) {
+        if(Auth::guard('web')->attempt($request->only('email', 'password'), $request->has('remember'))) {
             $user = Auth::guard('web')->user();
             if ($user->role == 'customer') {
                 $request->session()->regenerate();

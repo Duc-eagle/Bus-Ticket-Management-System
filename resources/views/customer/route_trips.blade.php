@@ -594,44 +594,35 @@
                         <a href="javascript:void(0)" class="trip-search-guide">Hướng dẫn mua vé</a>
                     </div>
 
-                    <form class="trip-search-form">
-                        <div class="trip-search-group">
-                            <label>Điểm đi</label>
-                            <input type="text" class="trip-search-field" value="{{ $route->departureStation->station_name ?? '' }}" placeholder="Chon diem di">
-                        </div>
+                    <form action="{{ route('customer.search') }}" method="GET" class="w-100">
+                        <input type="hidden" name="departure_id" value="{{ $route->departure_location }}">
+                        <input type="hidden" name="arrival_id" value="{{ $route->arrival_location }}">
+                        <div class="row align-items-end">
+                            <div class="col-md-4">
+                                <div class="trip-search-group">
+                                    <label>Điểm đi</label>
+                                    <input type="text" class="trip-search-field bg-light" value="{{ $route->departureStation->station_name ?? '' }}" readonly>
+                                </div>
+                            </div>
 
-                        <div class="trip-search-switch">
-                            <span><i class="fas fa-arrow-right"></i></span>
-                        </div>
+                            <div class="col-md-4">
+                                <div class="trip-search-group">
+                                    <label>Điểm đến</label>
+                                    <input type="text" class="trip-search-field bg-light" value="{{ $route->arrivalStation->station_name ?? '' }}" readonly>
+                                </div>
+                            </div>
 
-                        <div class="trip-search-group">
-                            <label>Điểm đến</label>
-                            <input type="text" class="trip-search-field" value="{{ $route->arrivalStation->station_name ?? '' }}" placeholder="Chon diem den">
-                        </div>
-
-                        <div class="trip-search-group">
-                            <label>Ngày đi</label>
-                            <div class="trip-search-field trip-search-date">
-                                <strong>{{ $today->format('d/m/Y') }}</strong>
-                                <span>{{ $today->translatedFormat('l') }}</span>
+                            <div class="col-md-4">
+                                <div class="trip-search-group">
+                                    <label>Ngày đi</label>
+                                    <div class="d-flex gap-2">
+                                        <input type="date" name="date" class="trip-search-field w-100" value="{{ request('date') ?? $today->format('Y-m-d') }}" min="{{ date('Y-m-d') }}">
+                                        <button type="submit" class="trip-search-btn" style="white-space: nowrap; margin-top: 0; align-self: center;">TÌM KIẾM</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-
-                        <div class="trip-search-group">
-                            <label>Số vé</label>
-                            <select class="trip-search-field">
-                                <option selected>1</option>
-                                <option>2</option>
-                                <option>3</option>
-                                <option>4</option>
-                                <option>5</option>
-                            </select>
-                        </div>
                     </form>
-
-                    <div class="trip-search-action">
-                        <button type="button" class="trip-search-btn">Tìm chuyến xe</button>
-                    </div>
                 </div>
             </div>
 
@@ -711,7 +702,11 @@
                                 <div class="trip-card">
                                     <!-- Hình ảnh nhà xe -->
                                     <div class="trip-card-image">
-                                        <i class="fas fa-bus"></i>
+                                        @if($trip->bus->images->isNotEmpty())
+                                            <img src="{{ asset('storage/' . $trip->bus->images->first()->image_path) }}" alt="Bus" style="width: 100%; height: 100%; object-fit: cover;">
+                                        @else
+                                            <i class="fas fa-bus"></i>
+                                        @endif
                                     </div>
 
                                     <!-- Thông tin chuyến -->
@@ -725,7 +720,7 @@
                                         <!-- Giờ đi -->
                                         <div class="trip-card-stop">
                                             <div class="trip-card-stop-icon"></div>
-                                            <span class="trip-card-stop-time">{{ \Carbon\Carbon::parse($trip->departure_time)->format('H:i') }}</span>
+                                            <span class="trip-card-stop-time">{{ \Carbon\Carbon::parse($trip->departure_time)->format('H:i') }} <span style="font-size: 13px; color: #64748b; font-weight: 500;">({{ \Carbon\Carbon::parse($trip->trip_date)->format('d/m/Y') }})</span></span>
                                             <span class="trip-card-station">{{ $route->departureStation->station_name ?? 'Đang cập nhật' }}</span>
                                         </div>
 
@@ -748,6 +743,9 @@
                                         <div class="trip-card-price">{{ number_format($trip->base_price, 0, ',', '.') }}đ</div>
                                         <div class="trip-card-available">Còn {{ $trip->available_seats }} chỗ trống</div>
                                         <div class="trip-card-buttons">
+                                            @if($trip->bus->images->isNotEmpty())
+                                                <button type="button" class="trip-card-btn trip-card-btn-secondary" style="background: #e2e8f0; color: #475569; padding: 9px 20px; border: none; border-radius: 8px; font-weight: 600; margin-right: 8px;" data-bs-toggle="modal" data-bs-target="#busImagesModal{{ $trip->bus->id }}">Xem ảnh xe</button>
+                                            @endif
                                             <!-- <a href="javascript:void(0)" class="trip-card-details">Thông tin chi tiết <i class="fas fa-chevron-down"></i></a> -->
                                             <button type="button" class="trip-card-btn trip-card-btn-primary btn-open-seat-modal" data-trip-id="{{ $trip->id }}" data-trip-date="{{ $trip->trip_date }}" data-bus-name="{{ $trip->bus->license_plate }}" data-price="{{ $trip->base_price }}" data-departure-time="{{ $trip->departure_time }}" data-arrival-time="{{ $trip->arrival_time }}" data-route-name="{{ $route->route_name }}">Chọn chuyến</button>
                                         </div>
@@ -767,5 +765,42 @@
     </section>
 
 @include('customer.partials.seat_selection_modal')
+
+<!-- Bus Images Modals -->
+@foreach($trips->unique('bus_id') as $trip)
+    @if($trip->bus->images->isNotEmpty())
+        <div class="modal fade" id="busImagesModal{{ $trip->bus->id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-bold">Hình ảnh xe: {{ $trip->bus->license_plate }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="carouselBus{{ $trip->bus->id }}" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-inner rounded">
+                                @foreach($trip->bus->images as $index => $image)
+                                    <div class="carousel-item {{ $index == 0 ? 'active' : '' }}">
+                                        <img src="{{ asset('storage/' . $image->image_path) }}" class="d-block w-100" alt="Bus Image" style="object-fit: cover; height: 300px;">
+                                    </div>
+                                @endforeach
+                            </div>
+                            @if($trip->bus->images->count() > 1)
+                                <button class="carousel-control-prev" type="button" data-bs-target="#carouselBus{{ $trip->bus->id }}" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Previous</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#carouselBus{{ $trip->bus->id }}" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Next</span>
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+@endforeach
 
 @endsection

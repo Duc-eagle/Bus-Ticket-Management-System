@@ -12,17 +12,41 @@ use Carbon\Carbon;
 
 class TripController extends Controller
 {
-    public function getSeats(Trip $trip)
+    public function getSeats($id)
     {
-        $seats = \App\Models\Seat::where('bus_id', $trip->bus_id)->get();
-        $bookedSeatIds = \App\Models\Ticket::where('trip_id', $trip->id)
-            ->whereIn('status', ['confirmed', 'paid', 'pending_payment'])
-            ->pluck('seat_id');
+        // 1. TÌM CHUYẾN ĐI (Không dùng Route Model Binding / findOrFail để tự bắt lỗi)
+        $trip = \App\Models\Trip::find($id);
+        
+        // 2. KIỂM TRA SỰ TỒN TẠI CỦA CHUYẾN ĐI
+        if ($trip == null) {
+            $errorResponse = [];
+            $errorResponse['success'] = false;
+            $errorResponse['message'] = 'Không tìm thấy chuyến đi này.';
+            return response()->json($errorResponse);
+        }
 
-        return response()->json([
-            'seats' => $seats,
-            'booked_seat_ids' => $bookedSeatIds
-        ]);
+        // 3. LẤY TẤT CẢ GHẾ CỦA CHIẾC XE CHẠY CHUYẾN NÀY
+        $seats = \App\Models\Seat::where('bus_id', $trip->bus_id)->get();
+
+        // 4. LẤY DANH SÁCH VÉ ĐÃ CÓ NGƯỜI ĐẶT
+        $bookedTickets = \App\Models\Ticket::where('trip_id', $trip->id)
+            ->whereIn('status', ['confirmed', 'paid', 'pending_payment'])
+            ->get();
+
+        // 5. NHẶT RA MÃ ID CỦA CÁC GHẾ ĐÃ ĐẶT (Bằng vòng lặp cơ bản, không dùng hàm pluck)
+        $bookedSeatIdsArray = [];
+        foreach ($bookedTickets as $ticket) {
+            $bookedSeatIdsArray[] = $ticket->seat_id;
+        }
+
+        // 6. GÁN TỪNG DỮ LIỆU VÀO MẢNG RESPONSE TRƯỚC KHI TRẢ VỀ
+        $responseData = [];
+        $responseData['success'] = true;
+        $responseData['seats'] = $seats;
+        $responseData['booked_seat_ids'] = $bookedSeatIdsArray;
+
+        // 7. XUẤT RA CHUẨN JSON
+        return response()->json($responseData);
     }
     public function index()
     {
@@ -71,9 +95,9 @@ class TripController extends Controller
     public function destroy(Trip $trip)
     {
         $trip->delete();
-        
+
         DB::statement('ALTER TABLE trips AUTO_INCREMENT = 1;');
-        
+
         return Redirect::route('trips.index');
     }
 }

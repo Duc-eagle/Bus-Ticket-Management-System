@@ -14,25 +14,25 @@ class DashboardController extends Controller
     {
         $now = Carbon::now();
 
-        // ==========================================
-        // 1. REVENUE ANALYTICS (DOANH THU)
-        // ==========================================
 
-        // Total Revenue This Month (Summary Card)
-        // Tính tổng tiền của tất cả các vé đã thanh toán hoặc xác nhận trong tháng hiện tại
+        // 1. REVENUE ANALYTICS (DOANH THU)
+
+
+        // Total Revenue This Month
+
         $totalRevenueThisMonth = Ticket::whereIn('status', ['paid', 'confirmed'])
             ->whereMonth('purchase_date', $now->month)
             ->whereYear('purchase_date', $now->year)
             ->sum('total');
 
         // Total Revenue This Year (Summary Card)
-        // Tính tổng tiền của tất cả các vé đã thanh toán hoặc xác nhận trong năm hiện tại
+
         $totalRevenueThisYear = Ticket::whereIn('status', ['paid', 'confirmed'])
             ->whereYear('purchase_date', $now->year)
             ->sum('total');
 
         // Total Tickets Sold (Summary Card)
-        // Đếm tổng số vé đã bán ra (tất cả trạng thái ngoại trừ cancelled)
+
         $totalTicketsSold = Ticket::where('status', '!=', 'cancelled')->count();
 
         // Revenue by Day in Current Month (Table -> Chart)
@@ -69,9 +69,9 @@ class DashboardController extends Controller
         $monthlyTicketCounts = $revenueByMonth->pluck('ticket_count')->toJson();
 
 
-        // ==========================================
-        // 2. ROUTE POPULARITY ANALYTICS (TUYẾN ĐƯỜNG)
-        // ==========================================
+
+        // 2. ROUTE POPULARITY ANALYTICS
+
 
         // Get ticket counts grouped by Route
         $routePerformance = DB::table('tickets')
@@ -82,10 +82,10 @@ class DashboardController extends Controller
             ->groupBy('routes.id', 'routes.route_name')
             ->get();
 
-        // Most Booked Routes: Sắp xếp giảm dần (nhiều vé nhất) và lấy 5 tuyến đầu
+        // Most Booked Routes:
         $mostBookedRoutes = $routePerformance->sortByDesc('ticket_count')->take(5);
 
-        // Least Booked Routes: Sắp xếp tăng dần (ít vé nhất) và lấy 5 tuyến đầu
+        // Least Booked Routes:
         $leastBookedRoutes = $routePerformance->sortBy('ticket_count')->take(5);
 
         // Calculate max tickets for the progress bar percentage

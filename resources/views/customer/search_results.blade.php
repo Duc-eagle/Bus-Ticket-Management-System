@@ -478,7 +478,11 @@
                             @foreach($trips as $trip)
                                 <div class="trip-card">
                                     <div class="trip-card-image">
-                                        <i class="fas fa-bus"></i>
+                                        @if($trip->bus->images->isNotEmpty())
+                                            <img src="{{ asset('storage/' . $trip->bus->images->first()->image_path) }}" alt="Bus" style="width: 100%; height: 100%; object-fit: cover;">
+                                        @else
+                                            <i class="fas fa-bus"></i>
+                                        @endif
                                     </div>
 
                                     <div class="trip-card-body">
@@ -489,7 +493,7 @@
 
                                         <div class="trip-card-stop">
                                             <div class="trip-card-stop-icon"></div>
-                                            <span class="trip-card-stop-time">{{ \Carbon\Carbon::parse($trip->departure_time)->format('H:i') }}</span>
+                                            <span class="trip-card-stop-time">{{ \Carbon\Carbon::parse($trip->departure_time)->format('H:i') }} <span style="font-size: 13px; color: #64748b; font-weight: 500;">({{ \Carbon\Carbon::parse($trip->trip_date)->format('d/m/Y') }})</span></span>
                                             <span class="trip-card-station">{{ $trip->route->departureStation->station_name ?? 'Đang cập nhật' }}</span>
                                         </div>
 
@@ -515,6 +519,9 @@
                                             @endif
                                         </div>
                                         <div class="trip-card-buttons">
+                                            @if($trip->bus->images->isNotEmpty())
+                                                <button type="button" class="trip-card-btn" style="background: #e2e8f0; color: #475569;" data-bs-toggle="modal" data-bs-target="#busImagesModal{{ $trip->bus->id }}">Xem ảnh xe</button>
+                                            @endif
                                             @if($trip->available_seats > 0)
                                                 <button type="button" class="trip-card-btn btn-open-seat-modal" data-trip-id="{{ $trip->id }}" data-price="{{ $trip->base_price }}">Chọn chỗ</button>
                                             @else
@@ -532,4 +539,41 @@
     </section>
 
     @include('customer.partials.seat_selection_modal')
+
+    <!-- Bus Images Modals -->
+    @foreach($trips->unique('bus_id') as $trip)
+        @if($trip->bus->images->isNotEmpty())
+            <div class="modal fade" id="busImagesModal{{ $trip->bus->id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header border-0 pb-0">
+                            <h5 class="modal-title fw-bold">Hình ảnh xe: {{ $trip->bus->license_plate }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div id="carouselBus{{ $trip->bus->id }}" class="carousel slide" data-bs-ride="carousel">
+                                <div class="carousel-inner rounded">
+                                    @foreach($trip->bus->images as $index => $image)
+                                        <div class="carousel-item {{ $index == 0 ? 'active' : '' }}">
+                                            <img src="{{ asset('storage/' . $image->image_path) }}" class="d-block w-100" alt="Bus Image" style="object-fit: cover; height: 300px;">
+                                        </div>
+                                    @endforeach
+                                </div>
+                                @if($trip->bus->images->count() > 1)
+                                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselBus{{ $trip->bus->id }}" data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Previous</span>
+                                    </button>
+                                    <button class="carousel-control-next" type="button" data-bs-target="#carouselBus{{ $trip->bus->id }}" data-bs-slide="next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Next</span>
+                                    </button>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+    @endforeach
 @endsection

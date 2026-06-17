@@ -6,8 +6,8 @@
     <style>
         .hero-section {
             background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
-                        url('https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1200&h=600&fit=crop') center/cover;
-            height: 550px;
+            url('{{ asset('images/come_my_bus.jpg') }}') center/cover;
+            height: 750px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -424,12 +424,12 @@
             <div class="hero-content">
                 <h1>Welcome to <span class="highlight">My Bus</span></h1>
                 <p>Đi để khám phá bản thân, đi để tìm thấy câu trả lời hạnh phúc thật sự</p>
-                <div class="hero-buttons">
-                    <button class="btn-explore">KHÁM PHÁ</button>
-                    <button class="btn-video">
-                        <i class="fas fa-play"></i> Watch Video
-                    </button>
-                </div>
+{{--                <div class="hero-buttons">--}}
+{{--                    <button class="btn-explore">KHÁM PHÁ</button>--}}
+{{--                    <button class="btn-video">--}}
+{{--                        <i class="fas fa-play"></i> Watch Video--}}
+{{--                    </button>--}}
+{{--                </div>--}}
             </div>
         </div>
 
@@ -542,12 +542,12 @@
 
             <div class="destinations-grid">
                 @foreach($provinces as $province)
-                    <div class="destination-card">
+                    <a href="{{ route('customer.search', ['arrival_id' => $province->id, 'date' => \Carbon\Carbon::today()->format('Y-m-d')]) }}" class="destination-card" style="text-decoration: none; display: block; color: inherit;">
                         <img src="{{ $province->image_path ? asset('storage/' . $province->image_path) : 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=400&h=300&fit=crop' }}" alt="{{ $province->province_name }}">
                         <div class="destination-overlay">
                             <span class="destination-name">{{ $province->province_name }}</span>
                         </div>
-                    </div>
+                    </a>
                 @endforeach
             </div>
         </div>

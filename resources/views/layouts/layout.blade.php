@@ -338,9 +338,9 @@
                     <li class="nav-item">
                         <a class="nav-link @if(Route::currentRouteName() === 'customer.history') active @endif" href="{{ route('customer.history') }}">Đơn hàng của tôi</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Liên hệ</a>
-                    </li>
+{{--                    <li class="nav-item">--}}
+{{--                        <a class="nav-link" href="#">Liên hệ</a>--}}
+{{--                    </li>--}}
 {{--                    <li class="nav-item">--}}
 {{--                        <a class="nav-link" href="#">Hóa đơn</a>--}}
 {{--                    </li>--}}
@@ -391,12 +391,12 @@
 
             <div class="footer-section">
                 <h3>Khác</h3>
-                <ul>
-                    <li><a href="#">Trở thành nhà cung cấp</a></li>
-                    <li><a href="#">Cộng tác với chúng tôi</a></li>
-                    <li><a href="#">Chính sách bảo mật</a></li>
-                    <li><a href="#">Liên kết hữu dụng</a></li>
-                </ul>
+{{--                <ul>--}}
+{{--                    <li><a href="#">Trở thành nhà cung cấp</a></li>--}}
+{{--                    <li><a href="#">Cộng tác với chúng tôi</a></li>--}}
+{{--                    <li><a href="#">Chính sách bảo mật</a></li>--}}
+{{--                    <li><a href="#">Liên kết hữu dụng</a></li>--}}
+{{--                </ul>--}}
             </div>
         </div>
 

@@ -40,9 +40,10 @@
                 
                 <div class="mb-4">
                     <label for="address" class="form-label fw-bold text-dark">Địa chỉ</label>
-                    <input type="text" class="form-control bg-light @error('address') is-invalid @enderror" id="address" name="address" required>
+                    <!-- Thẻ div trống để React "bơm" Component Character Counter vào -->
+                    <div id="character-counter-root"></div>
                     @error('address')
-                        <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
                     @enderror
                 </div>
                 

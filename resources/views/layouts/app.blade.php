@@ -11,6 +11,10 @@
     <!-- Google Fonts (Inter) -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
+    <!-- Tích hợp React Vite -->
+    @viteReactRefresh
+    @vite(['resources/js/app.jsx'])
+    
     <style>
         * {
             margin: 0;
@@ -332,6 +336,7 @@
             <a href="{{ route('tickets.index') }}" class="menu-item @if(str_contains(Route::currentRouteName(), 'tickets')) active @endif">
                 <i class="fas fa-ticket-alt"></i> Quản Lý Vé
             </a>
+            @if(Auth::guard('admin')->user()->role == 'admin')
             <a href="{{ route('trips.index') }}" class="menu-item @if(str_contains(Route::currentRouteName(), 'trips')) active @endif">
                 <i class="fas fa-calendar-check"></i> Quản Lý Chuyến Xe
             </a>
@@ -344,8 +349,10 @@
             <a href="{{ route('seats.index') }}" class="menu-item @if(str_contains(Route::currentRouteName(), 'seats')) active @endif">
                 <i class="fas fa-chair"></i> Quản Lý Ghế
             </a>
+            @endif
         </div>
 
+        @if(Auth::guard('admin')->user()->role == 'admin')
         <div class="menu-group">
             <div class="menu-title">Cấu hình hệ thống</div>
             <a href="{{ route('users.index') }}" class="menu-item @if(str_contains(Route::currentRouteName(), 'users')) active @endif">
@@ -361,6 +368,7 @@
                 <i class="fas fa-credit-card"></i> Phương Thức TT
             </a>
         </div>
+        @endif
     </div>
 
     <!-- Main Content -->

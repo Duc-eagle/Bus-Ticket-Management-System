@@ -358,7 +358,7 @@
                             Ghi nhớ đăng nhập
                         </label>
                     </div>
-                    <a href="#">Quên mật khẩu?</a>
+{{--                    <a href="#">Quên mật khẩu?</a>--}}
                 </div>
 
                 <button type="submit" class="btn-login">Đăng nhập</button>

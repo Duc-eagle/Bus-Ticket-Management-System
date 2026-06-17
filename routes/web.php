@@ -15,9 +15,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\AuthController;
 
-// ==========================================
-// PUBLIC ROUTES
-// ==========================================
+
 Route::get('/', [RouteController::class, 'homepage'])->name('home');
 
 Route::get('/welcome', function () {
@@ -28,7 +26,7 @@ Route::get('/bcrypt', function () {
     return bcrypt('12345678');
 });
 
-// API Routes
+
 Route::get('/api/trips/{trip}/seats', [TripController::class, 'getSeats'])->name('api.trips.seats');
 
 
@@ -36,17 +34,17 @@ Route::get('/api/trips/{trip}/seats', [TripController::class, 'getSeats'])->name
 // CUSTOMER ROUTES
 // ==========================================
 Route::prefix('customer')->group(function () {
-    
+
     // Public Customer Routes
     // Maps exactly to the previous Route::get('/customer', ...)->name('home');
     Route::get('/', [RouteController::class, 'homepage'])->name('home');
-    
+
     // Grouping the previous Route::get('/customer/search', ...)->name('customer.search');
     Route::get('/search', [RouteController::class, 'search'])->name('customer.search');
-    
+
     // Grouping the previous Route::get('/customer/routes/{route}/trips', ...)->name('customer.routes.trips');
     Route::get('/routes/{route}/trips', [RouteController::class, 'customerTrips'])->name('customer.routes.trips');
-    
+
     // Auth Routes
     Route::get('/login', [UserController::class, 'customerLogin'])->name('customer.login');
     Route::post('/login', [UserController::class, 'customerLoginProcess'])->name('customer.login.process');
@@ -59,7 +57,7 @@ Route::prefix('customer')->group(function () {
         Route::get('/account', [UserController::class, 'customerAccount'])->name('customer.account');
         Route::get('/change-password', [UserController::class, 'changePasswordView'])->name('customer.change-password');
         Route::post('/change-password', [UserController::class, 'changePasswordProcess'])->name('customer.change-password.store');
-        
+
         Route::get('/dashboard', function () {
             return view('customer.dashboard');
         })->name('customer.dashboard');
@@ -71,11 +69,11 @@ Route::prefix('customer')->group(function () {
         Route::post('/checkout/process', [CheckoutController::class, 'processCheckout'])->name('customer.checkout.process');
         Route::get('/checkout/retry/{ticket_name}', [CheckoutController::class, 'retryPayment'])->name('checkout.retry');
         Route::get('/checkout/success', [CheckoutController::class, 'success'])->name('customer.booking_success');
-        
+
         Route::get('/history', [UserController::class, 'history'])->name('customer.history');
         Route::get('/tickets/{id}', [UserController::class, 'show'])->name('customer.ticket.show');
         Route::post('/tickets/{id}/cancel', [UserController::class, 'cancel'])->name('customer.ticket.cancel');
-        
+
         Route::get('/payment/zalopay-return', [CheckoutController::class, 'zaloPayReturn'])->name('payment.zalopay_return');
     });
 });
@@ -103,7 +101,7 @@ Route::middleware('authAdmin')->prefix('admin')->group(function () {
     Route::middleware('role:admin')->group(function () {
         // Resources
         Route::resource('provinces', ProvinceController::class);
-        
+
         // Kebab-case URL for Bus Stations (/admin/bus-stations) but preserving names (bus_stations.index)
         Route::resource('bus-stations', BusStationController::class)
             ->names('bus_stations')
@@ -114,7 +112,7 @@ Route::middleware('authAdmin')->prefix('admin')->group(function () {
         Route::get('buses/{id}/seats', [SeatController::class, 'showByBus'])->name('admin.seats.by_bus');
         Route::resource('seats', SeatController::class);
         Route::resource('trips', TripController::class)->except(['show']);
-        
+
         Route::resource('payment-methods', PaymentMethodController::class)
             ->names('paymentMethods')
             ->parameters(['payment-methods' => 'paymentMethod']);

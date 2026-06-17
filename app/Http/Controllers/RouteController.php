@@ -21,36 +21,70 @@ class RouteController extends Controller
 
     public function search(Request $request)
     {
-        $departure_id = $request->get('departure_id');
-        $arrival_id = $request->get('arrival_id');
-        $date = $request->get('date');
+        // 1. LẤY DỮ LIỆU TỪ FORM TÌM KIẾM
+        $departure_id = $request->input('departure_id');
+        $arrival_id = $request->input('arrival_id');
+        $date = $request->input('date');
 
-        $query = \App\Models\Trip::with(['route.departureStation', 'route.arrivalStation', 'bus'])
-            ->where('status', '!=', 'cancelled');
-
-
-        //Sang loc tuyen duong
-        if ($departure_id || $arrival_id) {
-            $query->whereHas('route', function($q) use ($departure_id, $arrival_id) {
-                if ($departure_id) $q->where('departure_location', $departure_id);
-                if ($arrival_id) $q->where('arrival_location', $arrival_id);
-            });
+        // 2. KIỂM TRA ĐẦU VÀO CƠ BẢN (Không dùng $request->validate)
+        if (empty($departure_id)) {
+            return redirect()->back()->with('error', 'Vui lòng chọn điểm đi.');
         }
-        //Sang loc ngay gio
-        if ($date) {
-            $query->whereDate('trip_date', $date);
+        if (empty($arrival_id)) {
+            return redirect()->back()->with('error', 'Vui lòng chọn điểm đến.');
         }
-        //Thong ke ve ban va xuat du lieu
+
+        // 3. TÌM TUYẾN ĐƯỜNG PHÙ HỢP (Divide and Conquer - Bước 1)
+        // Thay vì dùng hàm whereHas phức tạp lồng nhau, ta tách ra làm 2 bước rõ ràng.
+        // Bước 1: Tìm tất cả các "Tuyến đường" (Route) thỏa mãn điểm đi và điểm đến.
+        $routes = \App\Models\Route::where('departure_location', $departure_id)
+                                   ->where('arrival_location', $arrival_id)
+                                   ->get();
+
+        // 4. LẤY DANH SÁCH ID CỦA CÁC TUYẾN ĐƯỜNG (Dùng vòng lặp foreach cơ bản)
+        $routeIdsArray = [];
+        foreach ($routes as $route) {
+            $routeIdsArray[] = $route->id;
+        }
+
+        // 5. TÌM CÁC CHUYẾN ĐI DỰA TRÊN ID TUYẾN ĐƯỜNG (Divide and Conquer - Bước 2)
+        // Lấy tất cả các "Chuyến đi" (Trip) thuộc về mảng ID tuyến đường vừa tìm được ở Bước 1.
+        $query = \App\Models\Trip::with(['route.departureStation', 'route.arrivalStation', 'bus.images'])
+                                 ->whereIn('route_id', $routeIdsArray);
+
+        // Lọc trạng thái rõ ràng (Thay cho hàm whereNotIn)
+        $query = $query->where('status', '!=', 'cancelled');
+        $query = $query->where('status', '!=', 'running');
+
+        // Lọc theo ngày đi nếu người dùng có chọn ngày
+        if (!empty($date)) {
+            $query = $query->whereDate('trip_date', $date);
+        }
+
+        // Đếm số ghế đã được đặt (đã thanh toán hoặc đang chờ)
         $trips = $query->withCount(['tickets as booked_seats' => function($q) {
             $q->whereIn('status', ['confirmed', 'paid', 'pending_payment']);
         }])->orderBy('trip_date')->orderBy('departure_time')->get();
-        //Tinh so ghe trong
-        foreach($trips as $trip) {
-            $trip->available_seats = max(0, $trip->bus->total_seats - $trip->booked_seats);
-        }
-        //Day ra giao dien
-        $stations = BusStation::all();
 
+        // 6. TÍNH TOÁN SỐ GHẾ TRỐNG THỦ CÔNG BẰNG VÒNG LẶP
+        foreach ($trips as $trip) {
+            $totalSeats = $trip->bus->total_seats;
+            $bookedSeats = $trip->booked_seats;
+            
+            $availableSeats = $totalSeats - $bookedSeats;
+            
+            // Đảm bảo số ghế trống không bị âm
+            if ($availableSeats < 0) {
+                $availableSeats = 0;
+            }
+            
+            $trip->available_seats = $availableSeats;
+        }
+
+        // Lấy danh sách trạm để hiển thị trên bộ lọc giao diện
+        $stations = \App\Models\BusStation::all();
+
+        // Đẩy dữ liệu ra view
         return view('customer.search_results', [
             'trips' => $trips,
             'stations' => $stations,
@@ -65,10 +99,11 @@ class RouteController extends Controller
 
         $route->load('departureStation', 'arrivalStation');
         $trips = $route->trips()
-            ->with('bus')
+            ->with('bus.images')
             ->withCount(['tickets as booked_seats' => function($q) {
                 $q->whereIn('status', ['confirmed', 'paid', 'pending_payment']);
             }])
+            ->whereNotIn('status', ['cancelled', 'running'])
             ->whereBetween('trip_date', [$today->toDateString(), $endDate->toDateString()])
             ->orderBy('trip_date')
             ->orderBy('departure_time')

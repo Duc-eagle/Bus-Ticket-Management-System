@@ -15,9 +15,15 @@
 
     <div class="card shadow-sm border-0">
         <div class="card-body p-4">
+            @if(session('error'))
+                <div class="alert alert-danger fw-bold shadow-sm">
+                    <i class="fas fa-exclamation-triangle me-2"></i>{{ session('error') }}
+                </div>
+            @endif
+
             <form action="{{ route('tickets.store') }}" method="POST">
                 @csrf
-                
+
                 <div class="row">
                     <div class="col-md-3 mb-4">
                         <label for="customer_phone" class="form-label fw-bold text-dark">Số điện thoại KH</label>
@@ -173,7 +179,7 @@
                 .then(response => response.json())
                 .then(data => {
                     seatSelect.innerHTML = '<option value="">-- Chọn ghế trống --</option>';
-                    
+
                     let hasAvailable = false;
                     data.seats.forEach(seat => {
                         // Check if seat is NOT in the booked_seat_ids array
